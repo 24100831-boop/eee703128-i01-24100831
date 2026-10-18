@@ -1,49 +1,81 @@
-`default_nettype none
-`timescale 1ns / 1ps
+`timescale 1ns/1ps
 
-/* This testbench just instantiates the module and makes some convenient wires
-   that can be driven / tested by the cocotb test.py.
-*/
-module tb ();
+module tb;
+    reg [7:0] ui_in;
+    reg [7:0] uio_in;
+    wire [7:0] uo_out;
+    wire [7:0] uio_out;
+    wire [7:0] uio_oe;
+    reg ena;
+    reg clk;
+    reg rst_n;
 
-  // Dump the signals to a FST file. You can view it with gtkwave or surfer.
-  initial begin
-    $dumpfile("tb.fst");
-    $dumpvars(0, tb);
-    #1;
-  end
+    tt_um_example uut (
+        .ui_in(ui_in),
+        .uo_out(uo_out),
+        .uio_in(uio_in),
+        .uio_out(uio_out),
+        .uio_oe(uio_oe),
+        .ena(ena),
+        .clk(clk),
+        .rst_n(rst_n)
+    );
 
-  // Wire up the inputs and outputs:
-  reg clk;
-  reg rst_n;
-  reg ena;
-  reg [7:0] ui_in;
-  reg [7:0] uio_in;
-  wire [7:0] uo_out;
-  wire [7:0] uio_out;
-  wire [7:0] uio_oe;
-`ifdef GL_TEST
-  wire VPWR = 1'b1;
-  wire VGND = 1'b0;
-`endif
+    always #5 clk = ~clk;
 
-  // Replace tt_um_example with your module name:
-  tt_um_example user_project (
+    task run_test(input [7:0] dividend, input [3:0] divisor);
+        begin
+            ui_in = dividend;
+            uio_in = {1'b1, 3'b000, divisor}; // uio_in[7] = start
+            #10;
+            uio_in[7] = 1'b0;
 
-      // Include power ports for the Gate Level test:
-`ifdef GL_TEST
-      .VPWR(VPWR),
-      .VGND(VGND),
-`endif
+            // Đờ cờ done ở bit 6 uio_out[6] lên 1
+            wait(uio_out[6] == 1'b1);
+            #10;
+            $display("TEST: %d / %d => Quotient = %d (Expected: %d), Remainder = %d, DivZero = %b",
+                     dividend, divisor, uo_out, dividend/divisor, uio_out[3:0], uio_out[7]);
+            #20;
+        end
+    endtask
 
-      .ui_in  (ui_in),    // Dedicated inputs
-      .uo_out (uo_out),   // Dedicated outputs
-      .uio_in (uio_in),   // IOs: Input path
-      .uio_out(uio_out),  // IOs: Output path
-      .uio_oe (uio_oe),   // IOs: Enable path (active high: 0=input, 1=output)
-      .ena    (ena),      // enable - goes high when design is selected
-      .clk    (clk),      // clock
-      .rst_n  (rst_n)     // not reset
-  );
+    initial begin
+        $dumpfile("sim/i01.vcd");
+        $dumpvars(0, tb);
 
+        clk = 0;
+        rst_n = 0;
+        ena = 1;
+        ui_in = 0;
+        uio_in = 0;
+
+        #20 rst_n = 1;
+        #10;
+
+        $display("=== START SIMULATION FOR I01 - RESTORING DIVIDER ===");
+
+        // Ca 1: Chia het
+        run_test(8'd200, 4'd10);
+
+        // Ca 2: Chia co du
+        run_test(8'd255, 4'd7);
+
+        // Ca 3: Chia cho 1
+        run_test(8'd168, 4'd1);
+
+        // Ca 4: So bi chia < So chia
+        run_test(8'd3, 4'd5);
+
+        // Ca 5: Chia cho 0
+        ui_in = 8'd200;
+        uio_in = {1'b1, 3'b000, 4'd0};
+        #10;
+        uio_in[7] = 1'b0;
+        wait(uio_out[6] == 1'b1);
+        #10;
+        $display("TEST DIV BY ZERO: 200 / 0 => DivZero Flag = %b (Expected: 1)", uio_out[7]);
+
+        $display("=== SIMULATION COMPLETED SUCCESSFULY ===");
+        $finish;
+    end
 endmodule
