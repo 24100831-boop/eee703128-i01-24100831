@@ -1,22 +1,19 @@
+yaml_version: 6
+
 project:
   title: "8-bit Restoring Divider"
-  author: "Duong Minh Duong"               
+  author: "Duong Minh Duong"                     
   discord: ""
   description: "8-bit by 4-bit Restoring Division Circuit"
   language: "Verilog"
   top_module: "tt_um_eee703128_I01"           
 
-  # Kích thước ô trên chip (mặc định 1x1 tile)
   tiles: "1x1"
-
-  # Tần số xung nhịp tính bằng Hz (10 MHz)
   clock_hz: 10000000
 
-  # Danh sách tệp mã nguồn Verilog trong thư mục src/
   source_files:
     - "project.v"
 
-# Bảng gán chân I/O tiêu chuẩn Tiny Tapeout
 pinout:
   ui: "dividend"
   ui[1]: "dividend[1]"
