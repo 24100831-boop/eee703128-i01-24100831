@@ -1,49 +1,56 @@
 project:
   title: "8-bit Restoring Divider"
-  author: "Dương Minh Dương"                         
+  author: "Duong Minh Duong"               
   discord: ""
   description: "8-bit by 4-bit Restoring Division Circuit"
   language: "Verilog"
-  top_module: "tt_um_eee703128_I01"             
+  top_module: "tt_um_eee703128_I01"           
+
+  # Kích thước ô trên chip (mặc định 1x1 tile)
+  tiles: "1x1"
+
+  # Tần số xung nhịp tính bằng Hz (10 MHz)
+  clock_hz: 10000000
+
+  # Danh sách tệp mã nguồn Verilog trong thư mục src/
+  source_files:
+    - "project.v"
+
+# Bảng gán chân I/O tiêu chuẩn Tiny Tapeout
+pinout:
+  ui: "dividend"
+  ui[1]: "dividend[1]"
+  ui[2]: "dividend[2]"
+  ui[3]: "dividend[3]"
+  ui[4]: "dividend[4]"
+  ui[5]: "dividend[5]"
+  ui[6]: "dividend[6]"
+  ui[7]: "dividend[7]"
+
+  uo: "quotient"
+  uo[1]: "quotient[1]"
+  uo[2]: "quotient[2]"
+  uo[3]: "quotient[3]"
+  uo[4]: "remainder"
+  uo[5]: "remainder[1]"
+  uo[6]: "remainder[2]"
+  uo[7]: "remainder[3]"
+
+  uio: "divisor"
+  uio[1]: "divisor[1]"
+  uio[2]: "divisor[2]"
+  uio[3]: "divisor[3]"
+  uio[4]: "div_by_zero"
+  uio[5]: "unused"
+  uio[6]: "unused"
+  uio[7]: "unused"
 
 documentation:
   inputs:
     - dividend
-    - dividend[1]
-    - dividend[2]
-    - dividend[3]
-    - dividend[4]
-    - dividend[5]
-    - dividend[6]
-    - dividend[7]
   outputs:
     - quotient
-    - quotient[1]
-    - quotient[2]
-    - quotient[3]
     - remainder
-    - remainder[1]
-    - remainder[2]
-    - remainder[3]
   bidirectional:
     - divisor
-    - divisor[1]
-    - divisor[2]
-    - divisor[3]
     - div_by_zero
-    - unused
-    - unused
-    - unused
-
-  # Bidirectional pins
-  uio[0]: ""
-  uio[1]: ""
-  uio[2]: ""
-  uio[3]: ""
-  uio[4]: ""
-  uio[5]: ""
-  uio[6]: ""
-  uio[7]: ""
-
-# Do not change!
-yaml_version: 6
