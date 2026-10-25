@@ -7,7 +7,7 @@ project:
   discord: ""
   description: "8-bit by 4-bit Restoring Division Circuit"
   language: "Verilog"
-  top_module: "24100831-boop/eee703128-i01-24100831"
+  top_module: "tt_um_24100831-boop/eee703128-i01-24100831"
 
   tiles: "1x1"
   clock_hz: 10000000
