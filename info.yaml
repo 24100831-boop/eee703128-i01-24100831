@@ -1,12 +1,13 @@
+
 yaml_version: 6
 
 project:
   title: "8-bit Restoring Divider"
-  author: "Duong Minh Duong"                     
+  author: "Duong Minh Duong"
   discord: ""
   description: "8-bit by 4-bit Restoring Division Circuit"
   language: "Verilog"
-  top_module: "tt_um_eee703128_I01"           
+  top_module: "tt_um_eee703128_I01"
 
   tiles: "1x1"
   clock_hz: 10000000
@@ -15,7 +16,7 @@ project:
     - "project.v"
 
 pinout:
-  ui: "dividend"
+  ui[0]: "dividend[0]"
   ui[1]: "dividend[1]"
   ui[2]: "dividend[2]"
   ui[3]: "dividend[3]"
@@ -24,16 +25,16 @@ pinout:
   ui[6]: "dividend[6]"
   ui[7]: "dividend[7]"
 
-  uo: "quotient"
+  uo[0]: "quotient[0]"
   uo[1]: "quotient[1]"
   uo[2]: "quotient[2]"
   uo[3]: "quotient[3]"
-  uo[4]: "remainder"
+  uo[4]: "remainder[0]"
   uo[5]: "remainder[1]"
   uo[6]: "remainder[2]"
   uo[7]: "remainder[3]"
 
-  uio: "divisor"
+  uio[0]: "divisor[0]"
   uio[1]: "divisor[1]"
   uio[2]: "divisor[2]"
   uio[3]: "divisor[3]"
