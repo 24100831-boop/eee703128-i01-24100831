@@ -1,3 +1,4 @@
+
 name: gds
 
 on:
@@ -8,7 +9,7 @@ jobs:
   gds:
     runs-on: ubuntu-24.04
     steps:
-      - name: checkout repo
+      - name: Checkout repo
         uses: actions/checkout@v6
         with:
           submodules: recursive
@@ -20,16 +21,18 @@ jobs:
 
   precheck:
     needs: gds
+    if: ${{ needs.gds.result == 'success' }}
     runs-on: ubuntu-24.04
     steps:
-      - name: Run Tiny Tapeout Precheck
+      - name: Run TinyTapeout Precheck
         uses: TinyTapeout/tt-gds-action/precheck@ttsky26d
 
   gl_test:
     needs: gds
+    if: ${{ needs.gds.result == 'success' }}
     runs-on: ubuntu-24.04
     steps:
-      - name: checkout repo
+      - name: Checkout repo
         uses: actions/checkout@v6
         with:
           submodules: recursive
@@ -39,9 +42,11 @@ jobs:
 
   viewer:
     needs: gds
+    if: ${{ needs.gds.result == 'success' }}
     runs-on: ubuntu-24.04
     permissions:
-      pages: write      # to deploy to Pages
-      id-token: write   # to verify the deployment originates from an appropriate source
+      pages: write
+      id-token: write
     steps:
-      - uses: TinyTapeout/tt-gds-action/viewer@ttsky26d
+      - name: Deploy viewer
+        uses: TinyTapeout/tt-gds-action/viewer@ttsky26d
