@@ -24,53 +24,67 @@ module tb;
 
     always #5 clk = ~clk;
 
-    // Wait for done with a timeout
-    task wait_done;
-        integer count;
-        begin
-            count = 0;
-            while ((uio_out[6] !== 1'b1) && (count < 1000)) begin
-                @(posedge clk);
-                count = count + 1;
-            end
 
-            if (count >= 1000) begin
-                $display("ERROR: Timeout waiting for done");
-                $fatal(1, "Divider timeout");
-            end
+task wait_done;
+    integer count;
+    begin
+        count = 0;
+        while ((uio_out[6] !== 1'b1) && (count < 1000)) begin
+            @(posedge clk);
+            count = count + 1;
         end
-    endtask
 
-    task run_test;
-        input [7:0] dividend;
-        input [3:0] divisor;
-        begin
-            @(negedge clk);
-            ui_in = dividend;
-            uio_in = {1'b1, 3'b000, divisor};
-
-            @(negedge clk);
-            uio_in[7] = 1'b0;
-
-            wait_done();
-            @(negedge clk);
-
-            if (divisor != 0) begin
-                $display(
-                    "TEST: %0d / %0d => Quotient=%0d Expected=%0d Remainder=%0d",
-                    dividend, divisor, uo_out,
-                    dividend / divisor, uio_out[3:0]
-                );
-            end else begin
-                $display(
-                    "TEST: %0d / 0 => DivZero=%b",
-                    dividend, uio_out[7]
-                );
-            end
-
-            repeat (2) @(negedge clk);
+        if (uio_out[6] !== 1'b1) begin
+            $fatal(1, "Divider timeout");
         end
-    endtask
+    end
+endtask
+
+task run_test;
+    input [7:0] dividend;
+    input [3:0] divisor;
+    reg [7:0] expected_q;
+    reg [3:0] expected_r;
+    begin
+        expected_q = 0;
+        expected_r = 0;
+
+        if (divisor != 0) begin
+            expected_q = dividend / divisor;
+            expected_r = dividend % divisor;
+        end
+
+        @(negedge clk);
+        ui_in = dividend;
+        uio_in = {1'b1, 3'b000, divisor};
+
+        @(negedge clk);
+        uio_in[7] = 1'b0;
+
+        wait_done;
+        #1;
+
+        if (divisor != 0) begin
+            $display(
+                "TEST: %0d / %0d => Q=%0d expected=%0d R=%0d expected_R=%0d",
+                dividend, divisor, uo_out, expected_q,
+                uio_out[3:0], expected_r
+            );
+
+            if (uo_out !== expected_q)
+                $error("Quotient mismatch");
+
+            if (uio_out[3:0] !== expected_r)
+                $error("Remainder mismatch");
+        end else begin
+            $display("TEST: %0d / 0 => DivZero=%b", dividend, uio_out[7]);
+            if (uio_out[7] !== 1'b1)
+                $error("Divide-by-zero flag mismatch");
+        end
+
+        repeat (2) @(negedge clk);
+    end
+endtask
 
     initial begin
         // Save waveform in current test directory
