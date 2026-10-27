@@ -1,6 +1,6 @@
 `default_nettype none
 
-module tt_um_example (
+module tt_um_eee703128_I01 (
     input  wire [7:0] ui_in,    // ui_in[7:0] = Dividend (Số bị chia 8-bit)
     output wire [7:0] uo_out,   // uo_out[7:0] = Quotient (Thương số 8-bit)
     input  wire [7:0] uio_in,   // uio_in[3:0] = Divisor (4-bit), uio_in[7] = start
