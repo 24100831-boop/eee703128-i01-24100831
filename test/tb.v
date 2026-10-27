@@ -1,3 +1,4 @@
+
 `timescale 1ns/1ps
 
 module tb;
@@ -23,24 +24,57 @@ module tb;
 
     always #5 clk = ~clk;
 
-    task run_test(input [7:0] dividend, input [3:0] divisor);
+    // Wait for done with a timeout
+    task wait_done;
+        integer count;
         begin
+            count = 0;
+            while ((uio_out[6] !== 1'b1) && (count < 1000)) begin
+                @(posedge clk);
+                count = count + 1;
+            end
+
+            if (count >= 1000) begin
+                $display("ERROR: Timeout waiting for done");
+                $fatal(1, "Divider timeout");
+            end
+        end
+    endtask
+
+    task run_test;
+        input [7:0] dividend;
+        input [3:0] divisor;
+        begin
+            @(negedge clk);
             ui_in = dividend;
-            uio_in = {1'b1, 3'b000, divisor}; // uio_in[7] = start
-            #10;
+            uio_in = {1'b1, 3'b000, divisor};
+
+            @(negedge clk);
             uio_in[7] = 1'b0;
 
-            // Đờ cờ done ở bit 6 uio_out[6] lên 1
-            wait(uio_out[6] == 1'b1);
-            #10;
-            $display("TEST: %d / %d => Quotient = %d (Expected: %d), Remainder = %d, DivZero = %b",
-                     dividend, divisor, uo_out, dividend/divisor, uio_out[3:0], uio_out[7]);
-            #20;
+            wait_done();
+            @(negedge clk);
+
+            if (divisor != 0) begin
+                $display(
+                    "TEST: %0d / %0d => Quotient=%0d Expected=%0d Remainder=%0d",
+                    dividend, divisor, uo_out,
+                    dividend / divisor, uio_out[3:0]
+                );
+            end else begin
+                $display(
+                    "TEST: %0d / 0 => DivZero=%b",
+                    dividend, uio_out[7]
+                );
+            end
+
+            repeat (2) @(negedge clk);
         end
     endtask
 
     initial begin
-        $dumpfile("sim/i01.vcd");
+        // Save waveform in current test directory
+        $dumpfile("i01.vcd");
         $dumpvars(0, tb);
 
         clk = 0;
@@ -49,33 +83,21 @@ module tb;
         ui_in = 0;
         uio_in = 0;
 
-        #20 rst_n = 1;
-        #10;
+        repeat (2) @(negedge clk);
+        rst_n = 1;
+        repeat (2) @(negedge clk);
 
-        $display("=== START SIMULATION FOR I01 - RESTORING DIVIDER ===");
+        $display("=== START I01 RESTORING DIVIDER TEST ===");
 
-        // Ca 1: Chia het
         run_test(8'd200, 4'd10);
-
-        // Ca 2: Chia co du
         run_test(8'd255, 4'd7);
-
-        // Ca 3: Chia cho 1
         run_test(8'd168, 4'd1);
+        run_test(8'd3,   4'd5);
+        run_test(8'd200, 4'd0);
 
-        // Ca 4: So bi chia < So chia
-        run_test(8'd3, 4'd5);
+        $display("=== ALL TEST VECTORS COMPLETED ===");
 
-        // Ca 5: Chia cho 0
-        ui_in = 8'd200;
-        uio_in = {1'b1, 3'b000, 4'd0};
-        #10;
-        uio_in[7] = 1'b0;
-        wait(uio_out[6] == 1'b1);
-        #10;
-        $display("TEST DIV BY ZERO: 200 / 0 => DivZero Flag = %b (Expected: 1)", uio_out[7]);
-
-        $display("=== SIMULATION COMPLETED SUCCESSFULY ===");
-        $finish;
+        // Do not call $finish here; Cocotb controls simulation shutdown.
     end
 endmodule
+
