@@ -10,7 +10,7 @@ module tb;
     reg clk;
     reg rst_n;
 
-    tt_um_example uut (
+    tt_um_eee703128_I01 uut (
         .ui_in(ui_in),
         .uo_out(uo_out),
         .uio_in(uio_in),
