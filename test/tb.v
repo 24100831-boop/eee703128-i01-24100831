@@ -7,7 +7,7 @@
 // `define DUT_MODULE tt_um_eee703128_i01_24100831
 
 `ifndef DUT_MODULE
-`define DUT_MODULE tt_um_i01_restoring_divider
+`define DUT_MODULE tt_um_eee703128_I01
 `endif
 
 module tb;
